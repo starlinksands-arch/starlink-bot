@@ -128,8 +128,7 @@ async def main() -> None:
     job_queue = application.job_queue
     job_queue.run_daily(
         daily_reminder,
-        time=time(20, 0, 0),
-        tzinfo=PH_TZ,
+        time=time(20, 0, 0, tzinfo=PH_TZ),
         name='daily_reminder'
     )
     
