@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, ContextTypes, MessageHandler, filters, CommandHandler
@@ -113,7 +114,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     """Log errors"""
     logger.error(msg="Exception while handling an update:", exc_info=context.error)
 
-def main() -> None:
+async def main() -> None:
     """Start the bot"""
     application = Application.builder().token(BOT_TOKEN).build()
     
@@ -127,7 +128,8 @@ def main() -> None:
     job_queue = application.job_queue
     job_queue.run_daily(
         daily_reminder,
-        time=time(20, 0, 0, tzinfo=PH_TZ),
+        time=time(20, 0, 0),
+        tzinfo=PH_TZ,
         name='daily_reminder'
     )
     
@@ -135,4 +137,4 @@ def main() -> None:
     application.run_polling()
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
