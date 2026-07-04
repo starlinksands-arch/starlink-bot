@@ -1,5 +1,5 @@
 import logging
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, ContextTypes, MessageHandler, filters, CommandHandler
 
 logging.basicConfig(
@@ -28,14 +28,27 @@ CHANNEL_LINK = "https://t.me/starlinkchannel"
 # Your Starlink photo
 PHOTO_URL = "https://ibb.co/bp478pt"
 
+# Create inline buttons for group and channel
+def get_invite_buttons():
+    """Create clickable buttons for group and channel"""
+    keyboard = [
+        [
+            InlineKeyboardButton("👥 Join Group", url=TARGET_GROUP_LINK),
+            InlineKeyboardButton("📢 Join Channel", url=CHANNEL_LINK)
+        ]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when /start command is issued"""
-    await update.message.reply_text(
+    caption = (
         "🚀 GRAND OPENING COMING SOON! 🎉\n\n"
         "🎁 Join BOTH our Telegram Group & Channel now to receive FREE Grand Opening Rewards!\n\n"
-        "⚠️ Rewards are available to Group & Channel Members ONLY. ⚠️\n\n"
-        f"👥 Group: {TARGET_GROUP_LINK}\n"
-        f"📢 Channel: {CHANNEL_LINK}"
+        "⚠️ Rewards are available to Group & Channel Members ONLY. ⚠️"
+    )
+    await update.message.reply_text(
+        caption,
+        reply_markup=get_invite_buttons()
     )
 
 async def invite_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -43,14 +56,12 @@ async def invite_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     caption = (
         "🚀 GRAND OPENING COMING SOON! 🎉\n\n"
         "🎁 Join BOTH our Telegram Group & Channel now to receive FREE Grand Opening Rewards!\n\n"
-        "⚠️ Rewards are available to Group & Channel Members ONLY. ⚠️\n\n"
-        f"👥 Group: {TARGET_GROUP_LINK}\n"
-        f"📢 Channel: {CHANNEL_LINK}"
+        "⚠️ Rewards are available to Group & Channel Members ONLY. ⚠️"
     )
     await update.message.reply_photo(
         photo=PHOTO_URL,
         caption=caption,
-        parse_mode='HTML'
+        reply_markup=get_invite_buttons()
     )
 
 async def member_joined(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -70,14 +81,13 @@ async def member_joined(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                 f"👋 Welcome, {member.mention_html()}!\n\n"
                 "🚀 GRAND OPENING COMING SOON! 🎉\n\n"
                 "🎁 Join BOTH our Telegram Group & Channel now to receive FREE Grand Opening Rewards!\n\n"
-                "⚠️ Rewards are available to Group & Channel Members ONLY. ⚠️\n\n"
-                f"👥 Group: {TARGET_GROUP_LINK}\n"
-                f"📢 Channel: {CHANNEL_LINK}"
+                "⚠️ Rewards are available to Group & Channel Members ONLY. ⚠️"
             )
             
             await update.message.reply_photo(
                 photo=PHOTO_URL,
                 caption=caption,
+                reply_markup=get_invite_buttons(),
                 parse_mode='HTML'
             )
             logger.info(f"✅ Sent invite with photo to {member.username or member.first_name} in group {update.message.chat_id}")
