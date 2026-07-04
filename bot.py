@@ -1,6 +1,8 @@
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, ContextTypes, MessageHandler, filters, CommandHandler
+from datetime import time
+import pytz
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -27,6 +29,9 @@ TARGET_GROUP_LINK = "https://t.me/StarlinkGamesEN"
 CHANNEL_LINK = "https://t.me/starlinkchannel"
 # Your Starlink photo
 PHOTO_URL = "https://ibb.co/bp478pt"
+
+# Philippines timezone
+PH_TZ = pytz.timezone('Asia/Manila')
 
 # Create inline buttons for group and channel
 def get_invite_buttons():
@@ -92,6 +97,26 @@ async def member_joined(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             )
             logger.info(f"✅ Sent invite with photo to {member.username or member.first_name} in group {update.message.chat_id}")
 
+async def daily_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Send daily reminder at 8 PM Philippines time to all admin groups"""
+    caption = (
+        "🚀 GRAND OPENING COMING SOON! 🎉\n\n"
+        "🎁 Join BOTH our Telegram Group & Channel now to receive FREE Grand Opening Rewards!\n\n"
+        "⚠️ Rewards are available to Group & Channel Members ONLY. ⚠️"
+    )
+    
+    for group_id in ADMIN_GROUP_IDS:
+        try:
+            await context.bot.send_photo(
+                chat_id=group_id,
+                photo=PHOTO_URL,
+                caption=caption,
+                reply_markup=get_invite_buttons()
+            )
+            logger.info(f"✅ Sent daily reminder to group {group_id}")
+        except Exception as e:
+            logger.error(f"❌ Failed to send reminder to group {group_id}: {e}")
+
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Log errors"""
     logger.error(msg="Exception while handling an update:", exc_info=context.error)
@@ -110,7 +135,16 @@ def main() -> None:
     # Add error handler
     application.add_error_handler(error_handler)
     
+    # Schedule daily reminder at 8 PM Philippines time
+    job_queue = application.job_queue
+    job_queue.run_daily(
+        daily_reminder,
+        time=time(20, 0, 0, tzinfo=PH_TZ),
+        name='daily_reminder'
+    )
+    
     print("🤖 Bot is running in 8 admin groups! Press Ctrl+C to stop.")
+    print("📅 Daily reminder scheduled for 8:00 PM Philippines time")
     application.run_polling()
 
 if __name__ == '__main__':
