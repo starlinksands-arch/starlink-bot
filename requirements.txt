@@ -1,12 +1,2 @@
-pytz
-``` dot) 🟢
-
----
-
-## **If it Still Crashes:**
-
-I can simplify the code to not use `pytz`. Just let me know!
-
----
-
-**Try updating `requirements.txt` first!** 👆
+python-telegram-bot==20.7
+pytz==2024.1
