@@ -27,13 +27,11 @@ ADMIN_GROUP_IDS = [
 
 TARGET_GROUP_LINK = "https://t.me/StarlinkGamesEN"
 CHANNEL_LINK = "https://t.me/starlinkchannel"
-# Your Starlink photo
 PHOTO_URL = "https://ibb.co/bp478pt"
 
 # Philippines timezone
 PH_TZ = pytz.timezone('Asia/Manila')
 
-# Create inline buttons for group and channel
 def get_invite_buttons():
     """Create clickable buttons for group and channel"""
     keyboard = [
@@ -51,10 +49,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "🎁 Join BOTH our Telegram Group & Channel now to receive FREE Grand Opening Rewards!\n\n"
         "⚠️ Rewards are available to Group & Channel Members ONLY. ⚠️"
     )
-    await update.message.reply_text(
-        caption,
-        reply_markup=get_invite_buttons()
-    )
+    await update.message.reply_text(caption, reply_markup=get_invite_buttons())
 
 async def invite_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send invite link with photo when user requests it with /invite"""
@@ -71,17 +66,14 @@ async def invite_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 async def member_joined(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Automatically send invite with photo when someone joins any of the admin groups"""
-    # Check if this is one of our admin groups
     if update.message.chat_id not in ADMIN_GROUP_IDS:
         return
     
     if update.message.new_chat_members:
         for member in update.message.new_chat_members:
-            # Skip if it's the bot itself
             if member.is_bot:
                 continue
             
-            # Send welcome message with photo and invite link
             caption = (
                 f"👋 Welcome, {member.mention_html()}!\n\n"
                 "🚀 GRAND OPENING COMING SOON! 🎉\n\n"
@@ -95,10 +87,10 @@ async def member_joined(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                 reply_markup=get_invite_buttons(),
                 parse_mode='HTML'
             )
-            logger.info(f"✅ Sent invite with photo to {member.username or member.first_name} in group {update.message.chat_id}")
+            logger.info(f"✅ Sent invite to {member.username or member.first_name}")
 
 async def daily_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send daily reminder at 8 PM Philippines time to all admin groups"""
+    """Send daily reminder at 8 PM Philippines time"""
     caption = (
         "🚀 GRAND OPENING COMING SOON! 🎉\n\n"
         "🎁 Join BOTH our Telegram Group & Channel now to receive FREE Grand Opening Rewards!\n\n"
@@ -115,7 +107,7 @@ async def daily_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
             )
             logger.info(f"✅ Sent daily reminder to group {group_id}")
         except Exception as e:
-            logger.error(f"❌ Failed to send reminder to group {group_id}: {e}")
+            logger.error(f"❌ Failed to send reminder: {e}")
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Log errors"""
@@ -125,17 +117,13 @@ def main() -> None:
     """Start the bot"""
     application = Application.builder().token(BOT_TOKEN).build()
     
-    # Add command handlers
+    # Add handlers
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("invite", invite_command))
-    
-    # Add handler for new members
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, member_joined))
-    
-    # Add error handler
     application.add_error_handler(error_handler)
     
-    # Schedule daily reminder at 8 PM Philippines time
+    # Schedule daily reminder at 8 PM PH time
     job_queue = application.job_queue
     job_queue.run_daily(
         daily_reminder,
@@ -143,8 +131,7 @@ def main() -> None:
         name='daily_reminder'
     )
     
-    print("🤖 Bot is running in 8 admin groups! Press Ctrl+C to stop.")
-    print("📅 Daily reminder scheduled for 8:00 PM Philippines time")
+    print("🤖 Bot is running! Daily reminder at 8 PM Philippines time")
     application.run_polling()
 
 if __name__ == '__main__':
